@@ -111,3 +111,22 @@ AI ถาม: ยอดมัดจำบนหน้าจอเอาจาก
 cd backend && pytest -v -k "AC_" 2>&1 | tee ../specs/002-booking/test-run.txt  ผล 15 passed, 1 skipped
 cd frontend && npm test  ผล 1 passed
 กรอก ac-results.md รอบที่ 2 และสรุป gaps.md 10 แถว
+
+## #35 | 4 ต.ค. 2569 | Copilot Chat (Agent) | /plan specs/002-booking/spec.md
+
+AI ตรวจ spec.md และตรวจว่าระดับ status เป็น baselined ไม่ใช่ Draft v1 จึงเริ่มเขียน plan.md ทันที
+AI สร้าง plan.md ในโฟลเดอร์เดียวกับ spec แล้วตรวจความครบตาม template
+- Constraint ที่ยังไม่ได้ใช้: ไม่มี; ทุก constraint ที่มีใน spec ถูกนำไปใช้ในแผน
+- AC ที่ทดสอบยาก: AC-07-08 ยังต้องพึ่งการย่อส่วน (scaled-down) เพราะสภาพแวดล้อมนักศึกษาไม่สามารถยิง 500 คนจริงได้โดยไม่ปรับเงื่อนไข
+- สิ่งที่อยากเดาแต่ไม่ได้เดา: การใช้คิว Redis / queue system จริง และวิธีรันความเร็วของ p95 ในสภาพแวดล้อมจริง เนื่องจาก spec ยังค้าง CR-02
+ผล: plan.md มีหัวข้อครบตาม template และสรุปแผนการพัฒนาจาก spec.md โดยยึดแนวทางที่มีใน spec เป็นหลัก
+
+## #36 | 4 ต.ค. 2569 | Copilot Chat (Agent) | /implement T-01 specs/002-booking/tasks.md
+
+AI ตรวจ state ของ task T-01: task นี้มีสถานะ "เสร็จ" ใน tasks.md และมีไฟล์โครงโปรเจกต์อยู่แล้วใน repo จึงไม่แก้ไขไฟล์เพิ่มเติม
+AI ทำ validation จริงด้วยคำสั่ง:
+cd /workspaces/Baanprom-KAT && cd backend && pytest -q && cd /workspaces/Baanprom-KAT/frontend && npm test -- --run
+ผลลัพธ์ที่ได้: backend มี 1 failed, 14 passed, 1 skipped; failure เกิดที่ tests/test_load_scaled.py::test_AC_07_08_search_under_load_scaled
+สาเหตุ: app/technicians/service.py เกิด TypeError เพราะ address.lat / address.lng เป็น None ระหว่างการคำนวณ distance_km
+ดังนั้น แม้โครงโปรเจกต์ T-01 จะมีอยู่แล้วและสามารถรัน pytest ได้จนถึงการทดสอบ AC-07-08 แต่ยังไม่ใช่สภาพแวดล้อมที่ “green” อย่างสมบูรณ์
+สิ่งที่เกือบต้องเดาแต่ไม่ทำ: ไม่มีการเดาเพิ่มใด ๆ เพราะข้อผิดพลาดนี้ไม่ใช่ project setup แต่เป็น data issue ในฟีเจอร์ค้นหาช่าง
